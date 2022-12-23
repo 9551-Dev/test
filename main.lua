@@ -295,34 +295,8 @@ local function reconstruct_mesh(w,h,d)
     local chunk_mesh
     chunk_mesh,interact = construct_mesh(map,w,h,d)
 
-    local color_shaders = {}
-    for i=0,15 do
-        color_shaders[i] = function(frag) return 2^i,false,frag end
-    end
 
-    local function matmul(a1,a2,a3,a4,b)
-        return a1*b[1]+a2*b[5]+a3*b[9]+a4*b[13],
-            a1*b[2]+a2*b[6]+a3*b[10]+a4*b[14],
-            a1*b[3]+a2*b[7]+a3*b[11]+a4*b[15],
-            a1*b[4]+a2*b[8]+a3*b[12]+a4*b[16]
-    end
-
-
-    mesh = chunk_mesh:make_geometry():push():set_vertex_shader(function(x,y,z,w,properties,scale,rot,pos,per,cam_transform,cam_position,cam_rotation)
-        local sc1,sc2,sc3,sc4    = matmul(x,y,z,w,scale)
-        local rx1,ry2,ry3,ry4    = matmul(sc1,sc2,sc3,sc4,rot)
-        local tl1,tl2,tl3,tl4    = matmul(rx1,ry2,ry3,ry4,pos)
-
-        local ct1,ct2,ct3,ct4
-        if cam_transform then
-            ct1,ct2,ct3,ct4 = matmul(tl1,tl2,tl3,tl4,cam_transform)
-        else
-            local cp1,cp2,cp3,cp4 = matmul(tl1,tl2,tl3,tl4,cam_position)
-            ct1,ct2,ct3,ct4 = matmul(cp1,cp2,cp3,cp4,cam_rotation)
-        end
-
-        return matmul(ct1,ct2,ct3,ct4,per)
-    end)
+    mesh = chunk_mesh:make_geometry():push()
 
     c3d.perspective.set_far_plane(100000)
 
