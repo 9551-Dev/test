@@ -43,10 +43,10 @@ local connections = {
 }
 
 math.randomseed(1)
-local GRASS,DIRT,STONE,GLASS,WATER,TURTLE,LOG,LEAVES = {1,0,true,0},{5,0,true,0},{2,0,true,0},{3,1,true,0},{4,2,false,0.1},{6,0,true,0},{7,0,true,0},{8,3,false,0}
+local GRASS,DIRT,STONE,GLASS,WATER,TURTLE,LOG,LEAVES,PLANKS,SBRICKS,BRICKS = {1,0,true,0},{5,0,true,0},{2,0,true,0},{3,1,true,0},{4,2,false,0.1},{6,0,true,0},{7,0,true,0},{8,3,false,0},{9,0,true,0},{10,0,true,0},{11,0,true,0}
 
 local name_lookup = {
-    "grass","stone","glass","water","dirt","turtle","oak log","leaves"
+    "grass","stone","glass","water","dirt","turtle","oak log","leaves","oak planks","stone bricks","bricks"
 }
 
 local data_lookup = {
@@ -57,7 +57,10 @@ local data_lookup = {
     DIRT,
     TURTLE,
     LOG,
-    LEAVES
+    LEAVES,
+    PLANKS,
+    SBRICKS,
+    BRICKS
 }
 
 local selected = 2
@@ -428,14 +431,17 @@ function c3d.load()
     local water_transparency_sheet = c3d.graphics.load_texture("water_transparency_sheet.ppm",{mipmap_levels=4})
     local water_skin_sheet         = c3d.graphics.load_texture("water_skin_sheet.ppm",{mipmap_levels=4,transparency=water_transparency_sheet})
 
-    textures[1] = c3d.graphics.load_texture("grass_skin.ppm",{mipmap_levels=4})
-    textures[2] = c3d.graphics.load_texture("stone_skin.ppm",{mipmap_levels=4})
-    textures[3] = c3d.graphics.load_texture("glass_skin.ppm",{transparency=c3d.graphics.load_texture("glass_skin.ppm",{mipmap_levels=4}),mipmap_levels=4})
-    textures[4] = water_skin_sheet:sprite_sheet({w=64,h=16}):make_animation(1,300)
-    textures[5] = c3d.graphics.load_texture("dirt_skin.ppm",{mipmap_levels=4})
-    textures[6] = c3d.graphics.load_texture("turtle_skin.ppm",{mipmap_levels=4})
-    textures[7] = c3d.graphics.load_texture("log_skin.ppm",{mipmap_levels=4})
-    textures[8] = c3d.graphics.load_texture("leaves_skin.ppm",{mipmap_levels=4,transparency=c3d.graphics.load_texture("leaves_transparency.ppm",{mipmap_levels=5})})
+    textures[1]  = c3d.graphics.load_texture("grass_skin.ppm",{mipmap_levels=4})
+    textures[2]  = c3d.graphics.load_texture("stone_skin.ppm",{mipmap_levels=4})
+    textures[3]  = c3d.graphics.load_texture("glass_skin.ppm",{transparency=c3d.graphics.load_texture("glass_skin.ppm",{mipmap_levels=4}),mipmap_levels=4})
+    textures[4]  = water_skin_sheet:sprite_sheet({w=64,h=16}):make_animation(1,300)
+    textures[5]  = c3d.graphics.load_texture("dirt_skin.ppm",{mipmap_levels=4})
+    textures[6]  = c3d.graphics.load_texture("turtle_skin.ppm",{mipmap_levels=4})
+    textures[7]  = c3d.graphics.load_texture("log_skin.ppm",{mipmap_levels=4})
+    textures[8]  = c3d.graphics.load_texture("leaves_skin.ppm",{mipmap_levels=4,transparency=c3d.graphics.load_texture("leaves_transparency.ppm",{mipmap_levels=5})})
+    textures[9]  = c3d.graphics.load_texture("oak_planks_skin.ppm")
+    textures[10] = c3d.graphics.load_texture("stone_bricks_skin.ppm")
+    textures[11] = c3d.graphics.load_texture("bricks_skin.ppm")
 
     generate_map()
     build_mesh()
@@ -552,6 +558,14 @@ function c3d.init()
                     c3d.log.add(c3d.timer.getFPS())
                     c3d.log.dump()
                     sleep(5)
+                end
+            end)
+
+            thread_registry:set_entry(c3d.registry.entry("mesh-update-thread"),function()
+                while true do
+                    if mesh then mesh:remove() end
+                    reconstruct_mesh(size,50,size)
+                    sleep(1)
                 end
             end)
 
